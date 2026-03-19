@@ -1,47 +1,60 @@
 ﻿# Image Resizer
 
-A desktop image resizing/compression app built with PyQt6 and Pillow.
+A simple desktop tool to resize and compress images to meet size and dimension limits for uploads.
 
-## Features
-- Select an input image from disk
-- Choose output file location and format
-- Set max width and height
-- Keep aspect ratio while resizing
-- Set max quality for JPEG and WEBP output
-- Optionally target a specific output file size in MB
-- Automatic quality adjustment until the image is below the target size
-- Grouped desktop layout for files, resize settings, compression, and status
+---
 
-## Supported Output Formats
-- JPEG (`.jpg`, `.jpeg`)
-- PNG (`.png`)
-- WEBP (`.webp`)
+## ✨ Why this tool
 
-Notes:
-- Target-size compression is available for JPEG and WEBP output.
-- PNG output is supported, but it does not use quality-based target-size compression.
+Many websites require images to meet strict file size or dimension limits.
 
-## Project Structure
-- `src/main.py`
-- `src/core/compressor.py`
-- `src/ui/main_window.py`
-- `docs/PRD.md`
-- `requirements.txt`
+However:
+- Photos from phones are often too large
+- Online tools are inconvenient or unreliable
+- Existing software is overly complex
 
-## Setup
+This tool provides a **simple and fast way** to prepare images for upload.
+
+---
+
+## 🚀 Features
+
+- Resize images by width and height
+- Compress images using adjustable quality
+- Target specific file sizes (e.g., under 5MB)
+- Maintain aspect ratio
+- Simple desktop interface
+
+---
+
+## 🖼️ Use Cases
+
+- Uploading documents to government websites
+- Insurance claim submissions
+- Job application portals
+- Social media uploads
+
+---
+
+## 📦 Installation
+
 ```bash
-python -m venv .venv
-.venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-## Run
+---
+
+## ▶️ Run
+
 ```bash
 python src/main.py
 ```
 
-Or:
+---
 
-```bash
-python -m src.main
-```
+## 🧩 Supported Formats
+
+- Input: PNG, JPG, JPEG, WEBP, BMP, TIFF
+- Output: JPG, JPEG, PNG, WEBP
+- Target file size mode is available for JPEG and WEBP output
+- PNG output is supported, but it does not use quality-based target-size compression
