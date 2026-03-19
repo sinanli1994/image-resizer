@@ -7,7 +7,6 @@ from PyQt6.QtWidgets import (
     QCheckBox,
     QDoubleSpinBox,
     QFileDialog,
-    QGridLayout,
     QGroupBox,
     QHBoxLayout,
     QLabel,
@@ -70,6 +69,14 @@ class MainWindow(QMainWindow):
         self.target_size_spin.setValue(5.0)
         self.target_size_spin.setEnabled(True)
 
+        for spin_box in (
+            self.width_spin,
+            self.height_spin,
+            self.quality_spin,
+            self.target_size_spin,
+        ):
+            spin_box.setMinimumWidth(170)
+
         self.status_label = QLabel(
             "Size-first mode is active. Enable dimension limits only if needed."
         )
@@ -123,6 +130,9 @@ class MainWindow(QMainWindow):
             #statusLabel {
                 color: #303030;
             }
+            QLabel[role="fieldLabel"] {
+                color: #4b4b4b;
+            }
             """
         )
 
@@ -142,44 +152,37 @@ class MainWindow(QMainWindow):
 
     def _build_resize_group(self) -> QGroupBox:
         group = QGroupBox("Resize Settings")
-        layout = QGridLayout(group)
-        layout.setContentsMargins(14, 18, 14, 14)
-        layout.setHorizontalSpacing(12)
-        layout.setVerticalSpacing(12)
-        layout.setColumnStretch(1, 1)
+        layout = QVBoxLayout(group)
+        layout.setContentsMargins(16, 18, 16, 16)
+        layout.setSpacing(14)
 
-        layout.addWidget(self._make_right_label("Resize mode"), 0, 0)
-        layout.addWidget(self._left_aligned_widget(self.resize_check), 0, 1)
-        layout.addWidget(self._make_right_label("Max width"), 1, 0)
-        layout.addWidget(self.width_spin, 1, 1)
-        layout.addWidget(self._make_right_label("Max height"), 2, 0)
-        layout.addWidget(self.height_spin, 2, 1)
-        layout.addWidget(self._make_right_label("Aspect ratio"), 3, 0)
-        layout.addWidget(self._left_aligned_widget(self.keep_ratio_check), 3, 1)
+        layout.addWidget(self._build_checkbox_row("Resize mode", self.resize_check))
+
+        size_row = QHBoxLayout()
+        size_row.setSpacing(12)
+        size_row.addWidget(self._build_field_stack("Max width", self.width_spin))
+        size_row.addWidget(self._build_field_stack("Max height", self.height_spin))
+        layout.addLayout(size_row)
+
+        layout.addWidget(self._build_checkbox_row("Aspect ratio", self.keep_ratio_check))
+        layout.addStretch(1)
         return group
 
     def _build_compression_group(self) -> QGroupBox:
         group = QGroupBox("Compression")
-        layout = QGridLayout(group)
-        layout.setContentsMargins(14, 18, 14, 14)
-        layout.setHorizontalSpacing(12)
-        layout.setVerticalSpacing(12)
-        layout.setColumnStretch(1, 1)
+        layout = QVBoxLayout(group)
+        layout.setContentsMargins(16, 18, 16, 16)
+        layout.setSpacing(14)
 
-        target_row = QHBoxLayout()
-        target_row.setSpacing(10)
-        target_row.setContentsMargins(0, 0, 0, 0)
-        target_row.addWidget(self.target_size_check)
-        target_row.addWidget(self.target_size_spin)
-        target_row.addStretch(1)
-
-        target_widget = QWidget()
-        target_widget.setLayout(target_row)
-
-        layout.addWidget(self._make_right_label("Max quality"), 0, 0)
-        layout.addWidget(self.quality_spin, 0, 1)
-        layout.addWidget(self._make_right_label("Size target"), 1, 0)
-        layout.addWidget(target_widget, 1, 1)
+        layout.addWidget(self._build_inline_field_row("Max quality", self.quality_spin))
+        layout.addWidget(
+            self._build_checkbox_and_field_row(
+                "Size target",
+                self.target_size_check,
+                self.target_size_spin,
+            )
+        )
+        layout.addStretch(1)
         return group
 
     def _build_labeled_path_row(
@@ -214,13 +217,54 @@ class MainWindow(QMainWindow):
         label.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
         return label
 
-    def _left_aligned_widget(self, child: QWidget) -> QWidget:
+    def _make_field_label(self, text: str) -> QLabel:
+        label = QLabel(text)
+        label.setProperty("role", "fieldLabel")
+        return label
+
+    def _build_field_stack(self, label_text: str, field: QWidget) -> QWidget:
+        container = QWidget()
+        layout = QVBoxLayout(container)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(6)
+        layout.addWidget(self._make_field_label(label_text))
+        layout.addWidget(field)
+        return container
+
+    def _build_checkbox_row(self, label_text: str, checkbox: QCheckBox) -> QWidget:
         container = QWidget()
         layout = QHBoxLayout(container)
         layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(0)
-        layout.addWidget(child)
+        layout.setSpacing(12)
+        layout.addWidget(self._make_right_label(label_text))
+        layout.addWidget(checkbox)
         layout.addStretch(1)
+        return container
+
+    def _build_inline_field_row(self, label_text: str, field: QWidget) -> QWidget:
+        container = QWidget()
+        layout = QHBoxLayout(container)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(12)
+        layout.addWidget(self._make_right_label(label_text))
+        layout.addStretch(1)
+        layout.addWidget(field)
+        return container
+
+    def _build_checkbox_and_field_row(
+        self,
+        label_text: str,
+        checkbox: QCheckBox,
+        field: QWidget,
+    ) -> QWidget:
+        container = QWidget()
+        layout = QHBoxLayout(container)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(12)
+        layout.addWidget(self._make_right_label(label_text))
+        layout.addWidget(checkbox)
+        layout.addStretch(1)
+        layout.addWidget(field)
         return container
 
     def _pick_input(self) -> None:
