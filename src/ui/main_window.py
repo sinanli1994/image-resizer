@@ -29,6 +29,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle("Image Resizer")
         self.setMinimumWidth(700)
+        self._centered_once = False
 
         self.input_path_edit = QLineEdit()
         self.input_path_edit.setPlaceholderText("Choose the source image")
@@ -57,17 +58,12 @@ class MainWindow(QMainWindow):
         self.keep_ratio_check.setChecked(True)
         self.keep_ratio_check.setEnabled(False)
 
-        self.target_size_check = QCheckBox("Target file size")
-        self.target_size_check.setChecked(True)
-        self.target_size_check.toggled.connect(self._toggle_target_size)
-
         self.target_size_spin = QDoubleSpinBox()
         self.target_size_spin.setRange(0.1, 500.0)
         self.target_size_spin.setDecimals(1)
         self.target_size_spin.setSingleStep(0.5)
         self.target_size_spin.setSuffix(" MB")
         self.target_size_spin.setValue(5.0)
-        self.target_size_spin.setEnabled(True)
 
         for spin_box in (
             self.width_spin,
@@ -87,6 +83,20 @@ class MainWindow(QMainWindow):
         self.status_label.setObjectName("statusLabel")
 
         self._build_ui()
+
+    def showEvent(self, event) -> None:
+        super().showEvent(event)
+        if not self._centered_once:
+            self._center_window()
+            self._centered_once = True
+
+    def _center_window(self) -> None:
+        screen = self.screen() or self.windowHandle().screen() if self.windowHandle() else None
+        if screen is None:
+            return
+        frame = self.frameGeometry()
+        frame.moveCenter(screen.availableGeometry().center())
+        self.move(frame.topLeft())
 
     def _build_ui(self) -> None:
         root = QWidget()
@@ -174,14 +184,8 @@ class MainWindow(QMainWindow):
         layout.setContentsMargins(16, 18, 16, 16)
         layout.setSpacing(14)
 
+        layout.addWidget(self._build_inline_field_row("Size target", self.target_size_spin))
         layout.addWidget(self._build_inline_field_row("Max quality", self.quality_spin))
-        layout.addWidget(
-            self._build_checkbox_and_field_row(
-                "Size target",
-                self.target_size_check,
-                self.target_size_spin,
-            )
-        )
         layout.addStretch(1)
         return group
 
@@ -251,22 +255,6 @@ class MainWindow(QMainWindow):
         layout.addWidget(field)
         return container
 
-    def _build_checkbox_and_field_row(
-        self,
-        label_text: str,
-        checkbox: QCheckBox,
-        field: QWidget,
-    ) -> QWidget:
-        container = QWidget()
-        layout = QHBoxLayout(container)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(12)
-        layout.addWidget(self._make_right_label(label_text))
-        layout.addWidget(checkbox)
-        layout.addStretch(1)
-        layout.addWidget(field)
-        return container
-
     def _pick_input(self) -> None:
         path, _ = QFileDialog.getOpenFileName(
             self,
@@ -302,9 +290,6 @@ class MainWindow(QMainWindow):
         self.height_spin.setEnabled(checked)
         self.keep_ratio_check.setEnabled(checked)
 
-    def _toggle_target_size(self, checked: bool) -> None:
-        self.target_size_spin.setEnabled(checked)
-
     def _run_resize(self) -> None:
         input_path = self.input_path_edit.text().strip()
         output_path = self.output_path_edit.text().strip()
@@ -324,9 +309,7 @@ class MainWindow(QMainWindow):
             )
             return
 
-        target_size_bytes = None
-        if self.target_size_check.isChecked():
-            target_size_bytes = int(self.target_size_spin.value() * BYTES_PER_MB)
+        target_size_bytes = int(self.target_size_spin.value() * BYTES_PER_MB)
 
         width = self.width_spin.value() if self.resize_check.isChecked() else None
         height = self.height_spin.value() if self.resize_check.isChecked() else None
