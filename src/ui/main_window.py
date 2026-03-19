@@ -37,22 +37,29 @@ class MainWindow(QMainWindow):
         self.output_path_edit = QLineEdit()
         self.output_path_edit.setPlaceholderText("Choose where to save the resized image")
 
+        self.resize_check = QCheckBox("Limit dimensions")
+        self.resize_check.toggled.connect(self._toggle_resize_settings)
+
         self.width_spin = QSpinBox()
         self.width_spin.setRange(1, 10000)
         self.width_spin.setValue(1280)
+        self.width_spin.setEnabled(False)
 
         self.height_spin = QSpinBox()
         self.height_spin.setRange(1, 10000)
         self.height_spin.setValue(720)
+        self.height_spin.setEnabled(False)
 
         self.quality_spin = QSpinBox()
-        self.quality_spin.setRange(1, 95)
-        self.quality_spin.setValue(85)
+        self.quality_spin.setRange(1, 100)
+        self.quality_spin.setValue(100)
 
         self.keep_ratio_check = QCheckBox("Keep aspect ratio")
         self.keep_ratio_check.setChecked(True)
+        self.keep_ratio_check.setEnabled(False)
 
         self.target_size_check = QCheckBox("Target file size")
+        self.target_size_check.setChecked(True)
         self.target_size_check.toggled.connect(self._toggle_target_size)
 
         self.target_size_spin = QDoubleSpinBox()
@@ -61,9 +68,11 @@ class MainWindow(QMainWindow):
         self.target_size_spin.setSingleStep(0.5)
         self.target_size_spin.setSuffix(" MB")
         self.target_size_spin.setValue(5.0)
-        self.target_size_spin.setEnabled(False)
+        self.target_size_spin.setEnabled(True)
 
-        self.status_label = QLabel("Select an image to begin.")
+        self.status_label = QLabel(
+            "Size-first mode is active. Enable dimension limits only if needed."
+        )
         self.status_label.setWordWrap(True)
         self.status_label.setAlignment(
             Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
@@ -84,8 +93,8 @@ class MainWindow(QMainWindow):
 
         settings_row = QHBoxLayout()
         settings_row.setSpacing(16)
-        settings_row.addWidget(self._build_resize_group(), 1)
         settings_row.addWidget(self._build_compression_group(), 1)
+        settings_row.addWidget(self._build_resize_group(), 1)
         main_layout.addLayout(settings_row)
 
         run_btn = QPushButton("Resize && Save")
@@ -139,12 +148,14 @@ class MainWindow(QMainWindow):
         layout.setVerticalSpacing(12)
         layout.setColumnStretch(1, 1)
 
-        layout.addWidget(self._make_right_label("Max width"), 0, 0)
-        layout.addWidget(self.width_spin, 0, 1)
-        layout.addWidget(self._make_right_label("Max height"), 1, 0)
-        layout.addWidget(self.height_spin, 1, 1)
-        layout.addWidget(self._make_right_label("Aspect ratio"), 2, 0)
-        layout.addWidget(self._left_aligned_widget(self.keep_ratio_check), 2, 1)
+        layout.addWidget(self._make_right_label("Resize mode"), 0, 0)
+        layout.addWidget(self._left_aligned_widget(self.resize_check), 0, 1)
+        layout.addWidget(self._make_right_label("Max width"), 1, 0)
+        layout.addWidget(self.width_spin, 1, 1)
+        layout.addWidget(self._make_right_label("Max height"), 2, 0)
+        layout.addWidget(self.height_spin, 2, 1)
+        layout.addWidget(self._make_right_label("Aspect ratio"), 3, 0)
+        layout.addWidget(self._left_aligned_widget(self.keep_ratio_check), 3, 1)
         return group
 
     def _build_compression_group(self) -> QGroupBox:
@@ -242,6 +253,11 @@ class MainWindow(QMainWindow):
         if path:
             self.output_path_edit.setText(path)
 
+    def _toggle_resize_settings(self, checked: bool) -> None:
+        self.width_spin.setEnabled(checked)
+        self.height_spin.setEnabled(checked)
+        self.keep_ratio_check.setEnabled(checked)
+
     def _toggle_target_size(self, checked: bool) -> None:
         self.target_size_spin.setEnabled(checked)
 
@@ -268,12 +284,15 @@ class MainWindow(QMainWindow):
         if self.target_size_check.isChecked():
             target_size_bytes = int(self.target_size_spin.value() * BYTES_PER_MB)
 
+        width = self.width_spin.value() if self.resize_check.isChecked() else None
+        height = self.height_spin.value() if self.resize_check.isChecked() else None
+
         try:
             result = resize_and_compress(
                 input_path=input_path,
                 output_path=output_path,
-                width=self.width_spin.value(),
-                height=self.height_spin.value(),
+                width=width,
+                height=height,
                 quality=self.quality_spin.value(),
                 keep_aspect_ratio=self.keep_ratio_check.isChecked(),
                 target_size_bytes=target_size_bytes,
