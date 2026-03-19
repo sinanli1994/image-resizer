@@ -1,6 +1,6 @@
 ﻿# Image Resizer
 
-A simple desktop tool to resize and compress images to meet size and dimension limits for uploads.
+A simple desktop tool to prepare images for upload by prioritizing file size first, with optional dimension limits when needed.
 
 ---
 
@@ -19,10 +19,11 @@ This tool provides a **simple and fast way** to prepare images for upload.
 
 ## 🚀 Features
 
-- Resize images by width and height
-- Compress images using adjustable quality
+- Size-first workflow by default
 - Target specific file sizes (e.g., under 5MB)
-- Maintain aspect ratio
+- Automatically maximize quality while staying under the target size
+- Optional width and height limits when file-size compression alone is not enough
+- Maintain aspect ratio when dimension limits are enabled
 - Simple desktop interface
 
 ---
@@ -58,3 +59,12 @@ python src/main.py
 - Output: JPG, JPEG, PNG, WEBP
 - Target file size mode is available for JPEG and WEBP output
 - PNG output is supported, but it does not use quality-based target-size compression
+
+---
+
+## ⚙️ Default Behavior
+
+- The app starts in size-first mode
+- Target file size is enabled by default and starts at `5.0 MB`
+- Dimension limits are optional and disabled by default
+- If the target cannot be reached by quality alone, you can enable dimension limits as a fallback
