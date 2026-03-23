@@ -28,6 +28,12 @@ This tool provides a **simple and fast way** to prepare images for upload.
 
 ---
 
+## 📸 App Preview
+
+![Image Resizer App](docs/Screenshots/app-screenshot.png)
+
+---
+
 ## 🖼️ Use Cases
 
 - Uploading documents to government websites
