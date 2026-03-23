@@ -4,6 +4,12 @@ A simple desktop tool to prepare images for upload by prioritizing file size fir
 
 ---
 
+## 📸 App Preview
+
+![Image Resizer App](docs/Screenshots/app-screenshot.png)
+
+---
+
 ## ✨ Why this tool
 
 Many websites require images to meet strict file size or dimension limits.
@@ -25,12 +31,6 @@ This tool provides a **simple and fast way** to prepare images for upload.
 - Optional width and height limits when file-size compression alone is not enough
 - Maintain aspect ratio when dimension limits are enabled
 - Simple desktop interface
-
----
-
-## 📸 App Preview
-
-![Image Resizer App](docs/Screenshots/app-screenshot.png)
 
 ---
 
